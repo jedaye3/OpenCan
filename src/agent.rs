@@ -60,10 +60,12 @@ pub fn run_agent() -> Result<()> {
                 continue;
             }
             config::append_memory_note(&config, trimmed)?;
+            refresh_system_prompt(&config, &mut messages)?;
             println!("Saved to memory.");
             continue;
         }
 
+        refresh_system_prompt(&config, &mut messages)?;
         let user_message = Message::user(input.to_string());
         logger.append(&user_message)?;
         messages.push(user_message);
@@ -77,5 +79,18 @@ pub fn run_agent() -> Result<()> {
     }
 
     println!("Session ended.");
+    Ok(())
+}
+
+fn refresh_system_prompt(config: &Config, messages: &mut Vec<Message>) -> Result<()> {
+    let latest = Message::system(config.build_system_prompt()?);
+    if let Some(first) = messages.first_mut() {
+        if first.role == "system" {
+            *first = latest;
+            return Ok(());
+        }
+    }
+
+    messages.insert(0, latest);
     Ok(())
 }
