@@ -30,10 +30,7 @@ struct AssistantMessage {
 
 pub fn chat_completion(config: &Config, messages: &[Message]) -> Result<String> {
     let key = config.api_key()?;
-    let endpoint = format!(
-        "{}/chat/completions",
-        config.base_url.trim_end_matches('/')
-    );
+    let endpoint = format!("{}/chat/completions", config.base_url.trim_end_matches('/'));
 
     let payload = ChatRequest {
         model: &config.model,

@@ -25,7 +25,9 @@ pub fn run_agent() -> Result<()> {
         io::stdout().flush().context("Failed flushing prompt")?;
 
         let mut input = String::new();
-        let bytes = stdin.read_line(&mut input).context("Failed reading stdin")?;
+        let bytes = stdin
+            .read_line(&mut input)
+            .context("Failed reading stdin")?;
         if bytes == 0 {
             break;
         }

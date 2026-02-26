@@ -51,9 +51,7 @@ fn main() -> Result<()> {
         } => {
             let path = config::write_default_config(force, model, base_url, api_key_env)?;
             println!("Wrote config: {}", path.display());
-            println!(
-                "Next: export OPEN_API_KEY (or OPENAI_API_KEY) and run `opencan doctor`."
-            );
+            println!("Next: export OPEN_API_KEY (or OPENAI_API_KEY) and run `opencan doctor`.");
         }
         Commands::Doctor => run_doctor()?,
         Commands::Agent => agent::run_agent()?,

@@ -101,8 +101,7 @@ impl Config {
 
         Ok(format!(
             "{}\n\nLong-term project memory:\n{}",
-            self.system_prompt,
-            memory
+            self.system_prompt, memory
         ))
     }
 }
