@@ -43,15 +43,18 @@ cargo run -- onboard
 export OPEN_API_KEY="<api_key>"
 ```
 
+`OPENAI_API_KEY` is also accepted.
+
 ### 5) Validate setup and start
 
 ```bash
 cargo run -- doctor
-cargo run -- agent
+cargo run
 ```
 
 ## Command Reference
 
+- `opencan` (starts interactive agent session)
 - `opencan onboard [--force] [--model <model>] [--base-url <url>] [--api-key-env <name>]`
 - `opencan doctor`
 - `opencan agent`
@@ -88,7 +91,7 @@ Then run:
 
 ```bash
 opencan onboard
-opencan agent
+opencan
 ```
 
 ## Make API Key Persistent (zsh)

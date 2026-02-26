@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 
 const APP_DIR: &str = ".opencan";
 const CONFIG_NAME: &str = "config.toml";
+const API_KEY_FALLBACK_VARS: [&str; 2] = ["OPEN_API_KEY", "OPENAI_API_KEY"];
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -69,18 +70,22 @@ impl Config {
     }
 
     pub fn api_key(&self) -> Result<String> {
-        let value = env::var(&self.api_key_env).with_context(|| {
-            format!(
-                "Environment variable {} is not set. Export it and retry.",
-                self.api_key_env
-            )
-        })?;
+        let (_, key) = self.resolve_api_key()?;
+        Ok(key)
+    }
 
-        if value.trim().is_empty() {
-            bail!("{} is set but empty", self.api_key_env);
+    pub fn resolve_api_key(&self) -> Result<(String, String)> {
+        for name in self.api_key_candidates() {
+            match env::var(&name) {
+                Ok(value) if !value.trim().is_empty() => return Ok((name, value)),
+                _ => continue,
+            }
         }
 
-        Ok(value)
+        bail!(
+            "No API key found. Checked env vars: {}. Export one and retry.",
+            self.api_key_candidates().join(", ")
+        )
     }
 
     pub fn memory_path(&self) -> Result<PathBuf> {
@@ -99,6 +104,18 @@ impl Config {
             self.system_prompt,
             memory
         ))
+    }
+}
+
+impl Config {
+    fn api_key_candidates(&self) -> Vec<String> {
+        let mut names = vec![self.api_key_env.clone()];
+        for fallback in API_KEY_FALLBACK_VARS {
+            if !names.iter().any(|name| name == fallback) {
+                names.push(fallback.to_string());
+            }
+        }
+        names
     }
 }
 

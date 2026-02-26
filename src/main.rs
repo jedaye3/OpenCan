@@ -17,7 +17,7 @@ use crate::config::Config;
 )]
 struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
 }
 
 #[derive(Debug, Subcommand)]
@@ -42,7 +42,7 @@ enum Commands {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    match cli.command {
+    match cli.command.unwrap_or(Commands::Agent) {
         Commands::Onboard {
             force,
             model,
@@ -51,7 +51,9 @@ fn main() -> Result<()> {
         } => {
             let path = config::write_default_config(force, model, base_url, api_key_env)?;
             println!("Wrote config: {}", path.display());
-            println!("Next: export OPEN_API_KEY (or configured env var) and run `opencan doctor`.");
+            println!(
+                "Next: export OPEN_API_KEY (or OPENAI_API_KEY) and run `opencan doctor`."
+            );
         }
         Commands::Doctor => run_doctor()?,
         Commands::Agent => agent::run_agent()?,
@@ -69,10 +71,10 @@ fn run_doctor() -> Result<()> {
 
     println!("Model: {}", config.model);
     println!("Base URL: {}", config.base_url);
-    println!("API key env var: {}", config.api_key_env);
+    println!("Configured API key env var: {}", config.api_key_env);
 
-    match config.api_key() {
-        Ok(_) => println!("API key: present"),
+    match config.resolve_api_key() {
+        Ok((source, _)) => println!("API key: present ({})", source),
         Err(err) => println!("API key: missing ({})", err),
     }
 
